@@ -2,8 +2,8 @@
   "compilerOptions": {
     "target": "es2016",
     "module": "commonjs",
-    "rootDir": "./src",
-    "outDir": "./dist",
+    "rootDir": ".",              // Root directory now includes everything
+    "outDir": "./dist",          // Output directory for compiled files
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
@@ -12,12 +12,13 @@
     "resolveJsonModule": true,
     "noEmit": false
   },
-  "typeRoots": [
-    "./node_modules/@types",  // Default types folder
-    "./"                       // Add root for your custom types
-  ],
   "include": [
-    "src/**/*.ts",       // Include your source files
-    "types.d.ts"         // Explicitly include your custom type definitions file
+    "./*.ts",                   // Include top-level `index.ts` and `app.ts`
+    "src/**/*.ts",              // Include all .ts files in the `src` directory
+    "types.d.ts"                // Explicitly include your custom type definitions
+  ],
+  "exclude": [
+    "node_modules",             // Exclude dependencies
+    "dist"                      // Exclude the build output folder
   ]
 }
