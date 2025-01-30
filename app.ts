@@ -1,4 +1,5 @@
 import express, { urlencoded } from 'express'; 
+import { ApolloServer } from 'apollo-server-express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import movieRouter from './src/router/movie';
