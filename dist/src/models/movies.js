@@ -37,6 +37,8 @@ const movieSchema = new mongoose_1.Schema({
         },
         lastUpdated: { type: Date },
     },
+    likes: { type: Number, default: 0 }, // Number of likes
+    likedBy: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User" }],
 }, {
     collection: "movies", // Explicitly specify the collection name
 });

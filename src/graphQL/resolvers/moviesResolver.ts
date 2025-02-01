@@ -23,7 +23,7 @@ const resolvers = {
                             $limit:pageSize
                         }
                     ])
-                     
+                      
                 }
                 else{
                       allMovies = await movies.aggregate([

@@ -12,8 +12,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fetchTopRated = exports.fetchGenres = exports.fetchMovieById = exports.fetchMovies = void 0;
+exports.likeUnlikeMovie = exports.fetchTopRated = exports.fetchGenres = exports.fetchMovieById = exports.fetchMovies = void 0;
 const movies_1 = __importDefault(require("../models/movies"));
+const users_1 = __importDefault(require("../models/users"));
 const fetchMovies = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { page = 1, pageSize = 9 } = req.query;
     const pageNumber = parseInt(page, 10);
@@ -163,3 +164,49 @@ const fetchTopRated = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.fetchTopRated = fetchTopRated;
+const likeUnlikeMovie = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params; // movie ID
+    const { user } = req.body; // user info from the authenticated request
+    try {
+        console.log("Like function called", user.email);
+        // Fetch the movie and the user
+        const movie = yield movies_1.default.findById(id);
+        const likedByUser = yield users_1.default.findOne({ email: user.email });
+        // Check if both movie and user exist
+        if (!movie || !likedByUser) {
+            res.status(404).send({ error: "Movie or User not found" });
+            return;
+        }
+        // Check if the user already liked this movie
+        const alreadyLiked = movie.likedBy.includes(likedByUser._id);
+        if (alreadyLiked) {
+            // User is unliking the movie
+            movie.likes -= 1;
+            // Remove user from the likedBy array
+            movie.likedBy = movie.likedBy.filter((userId) => userId.toString() !== likedByUser._id.toString());
+            // Update the user's likedMovies list
+            likedByUser.likedMovies = likedByUser.likedMovies.filter((movieId) => { var _a; return movieId.toString() !== ((_a = movie._id) === null || _a === void 0 ? void 0 : _a.toString()); });
+        }
+        else {
+            // User is liking the movie
+            movie.likes += 1;
+            // Add user to the likedBy array
+            movie.likedBy.push(likedByUser._id);
+            // Update the user's likedMovies list
+            likedByUser.likedMovies.push(movie._id);
+        }
+        // Save the changes to the movie and user
+        yield movie.save();
+        yield likedByUser.save();
+        res.status(200).send({
+            message: `Movie ${alreadyLiked ? "unliked" : "liked"} successfully`,
+            likes: movie.likes,
+        });
+    }
+    catch (err) {
+        console.log("Like function called", user.email);
+        console.error("Error while liking the movie:", err);
+        res.status(500).send({ error: "An error occurred while liking the movie" });
+    }
+});
+exports.likeUnlikeMovie = likeUnlikeMovie;

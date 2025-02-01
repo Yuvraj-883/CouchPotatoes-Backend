@@ -12,23 +12,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.userDetails = void 0;
-const users_1 = __importDefault(require("../models/users"));
-const userDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(req.body.user);
-    const user = req.body.user;
+const mongoose_1 = __importDefault(require("mongoose"));
+const comments_1 = __importDefault(require("../models/comments"));
+const constants_1 = require("../constants");
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config({ path: '../../.env' });
+const updateComments = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if (user) {
-            const userDetails = yield users_1.default.findOne({ email: user.email }).populate("likedMovies");
-            res.status(200).json({ user: userDetails });
-        }
-        else {
-            res.status(401).json({ message: "User not found" });
-        }
+        yield mongoose_1.default.connect(`${process.env.MONGO_URI}/${constants_1.DB_NAME}`);
+        yield comments_1.default.updateMany({ parent_id: { $exists: false } }, { isParent: true });
+        yield comments_1.default.updateMany({ parent_id: { $exists: true } }, { isParent: false });
+        mongoose_1.default.connection.close();
     }
     catch (err) {
-        console.error("Error while fetching user details:", err);
-        res.status(500).json({ message: "Internal server error", error: err.message });
+        console.log("Error while updating comments:", err);
+    }
+    finally {
+        console.log(process.env.MONGO_URI);
     }
 });
-exports.userDetails = userDetails;
+updateComments();
